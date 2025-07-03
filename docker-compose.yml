@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: github-discord-notifier-sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=YourStrong@Passw0rd
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    networks:
+      - notifier-network
+    healthcheck:
+      test: ["CMD", "/opt/mssql-tools/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "YourStrong@Passw0rd", "-Q", "SELECT 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 40s
+
+  redis:
+    image: redis:7-alpine
+    container_name: github-discord-notifier-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - notifier-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: src/GitHubDiscordNotifier.Api/Dockerfile
+    container_name: github-discord-notifier-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - AzureWebJobsStorage=UseDevelopmentStorage=true
+      - SqlConnectionString=Server=sqlserver;Database=GitHubDiscordNotifier;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true
+      - RedisConnectionString=redis:6379
+      - FUNCTIONS_WORKER_RUNTIME=dotnet
+    ports:
+      - "7071:80"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - notifier-network
+
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite
+    container_name: github-discord-notifier-azurite
+    hostname: azurite
+    restart: always
+    ports:
+      - "10000:10000"
+      - "10001:10001"
+      - "10002:10002"
+    networks:
+      - notifier-network
+
+networks:
+  notifier-network:
+    driver: bridge
+
+volumes:
+  sqlserver-data:
+  redis-data:

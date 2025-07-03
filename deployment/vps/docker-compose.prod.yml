@@ -1,0 +1,143 @@
+version: '3.8'
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: github-discord-notifier-sqlserver-prod
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=${SQL_SERVER_PASSWORD}
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+      - ./backups:/var/opt/mssql/backups
+    networks:
+      - notifier-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "/opt/mssql-tools/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "${SQL_SERVER_PASSWORD}", "-Q", "SELECT 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  redis:
+    image: redis:7-alpine
+    container_name: github-discord-notifier-redis-prod
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis-data:/data
+      - ./redis.conf:/usr/local/etc/redis/redis.conf:ro
+    command: redis-server /usr/local/etc/redis/redis.conf
+    networks:
+      - notifier-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  api:
+    image: ghcr.io/pretechcommunity/github-discord-notifier:latest
+    container_name: github-discord-notifier-api-prod
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - SqlConnectionString=Server=sqlserver;Database=GitHubDiscordNotifier;User Id=sa;Password=${SQL_SERVER_PASSWORD};TrustServerCertificate=true
+      - RedisConnectionString=redis:6379
+      - JwtSecret=${JWT_SECRET}
+      - FUNCTIONS_WORKER_RUNTIME=dotnet
+    ports:
+      - "127.0.0.1:7071:80"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - notifier-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
+  frontend:
+    image: ghcr.io/pretechcommunity/github-discord-notifier-frontend:latest
+    container_name: github-discord-notifier-frontend-prod
+    ports:
+      - "127.0.0.1:8080:80"
+    depends_on:
+      - api
+    networks:
+      - notifier-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
+
+  # Log aggregation (optional)
+  loki:
+    image: grafana/loki:latest
+    container_name: github-discord-notifier-loki
+    ports:
+      - "127.0.0.1:3100:3100"
+    volumes:
+      - loki-data:/loki
+      - ./loki-config.yml:/etc/loki/local-config.yaml:ro
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - notifier-network
+    restart: unless-stopped
+
+  # Metrics monitoring (optional)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: github-discord-notifier-prometheus
+    ports:
+      - "127.0.0.1:9090:9090"
+    volumes:
+      - prometheus-data:/prometheus
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - notifier-network
+    restart: unless-stopped
+
+networks:
+  notifier-network:
+    driver: bridge
+
+volumes:
+  sqlserver-data:
+    driver: local
+  redis-data:
+    driver: local
+  loki-data:
+    driver: local
+  prometheus-data:
+    driver: local
