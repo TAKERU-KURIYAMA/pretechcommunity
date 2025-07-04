@@ -1,25 +1,24 @@
 version: '3.8'
 
 services:
-  sqlserver:
-    image: mcr.microsoft.com/mssql/server:2019-latest
-    container_name: github-discord-notifier-sqlserver
+  postgres:
+    image: postgres:16-alpine
+    container_name: github-discord-notifier-postgres
     environment:
-      - ACCEPT_EULA=Y
-      - SA_PASSWORD=YourStrong@Passw0rd
-      - MSSQL_PID=Developer
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=github_discord_notifier
     ports:
-      - "1433:1433"
+      - "5432:5432"
     volumes:
-      - sqlserver-data:/var/opt/mssql
+      - postgres-data:/var/lib/postgresql/data
     networks:
       - notifier-network
     healthcheck:
-      test: ["CMD", "/opt/mssql-tools/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "YourStrong@Passw0rd", "-Q", "SELECT 1"]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
-      timeout: 3s
-      retries: 10
-      start_period: 40s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:7-alpine
@@ -43,29 +42,44 @@ services:
     container_name: github-discord-notifier-api
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - AzureWebJobsStorage=UseDevelopmentStorage=true
-      - SqlConnectionString=Server=sqlserver;Database=GitHubDiscordNotifier;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true
-      - RedisConnectionString=redis:6379
-      - FUNCTIONS_WORKER_RUNTIME=dotnet
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=github_discord_notifier;Username=postgres;Password=postgres
+      - ConnectionStrings__Redis=redis:6379
+      - JwtSettings__SecretKey=ThisIsAVerySecureSecretKeyForJWTTokenGenerationPleaseChangeInProduction
+      - Frontend__Url=http://localhost:8080
     ports:
-      - "7071:80"
+      - "5000:5000"
     depends_on:
-      sqlserver:
+      postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
+    volumes:
+      - ./logs:/app/logs
     networks:
       - notifier-network
 
-  azurite:
-    image: mcr.microsoft.com/azure-storage/azurite
-    container_name: github-discord-notifier-azurite
-    hostname: azurite
-    restart: always
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: github-discord-notifier-frontend
     ports:
-      - "10000:10000"
-      - "10001:10001"
-      - "10002:10002"
+      - "8080:80"
+    depends_on:
+      - api
+    networks:
+      - notifier-network
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: github-discord-notifier-pgadmin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@example.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
     networks:
       - notifier-network
 
@@ -74,5 +88,5 @@ networks:
     driver: bridge
 
 volumes:
-  sqlserver-data:
+  postgres-data:
   redis-data:
