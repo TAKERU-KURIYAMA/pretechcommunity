@@ -1,23 +1,23 @@
-FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build-env
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
+EXPOSE 5000
 
-# Copy solution and project files
-COPY GitHubDiscordNotifier.sln ./
-COPY src/GitHubDiscordNotifier.Common/*.csproj ./src/GitHubDiscordNotifier.Common/
-COPY src/GitHubDiscordNotifier.Api/*.csproj ./src/GitHubDiscordNotifier.Api/
-COPY src/GitHubDiscordNotifier.Tests/*.csproj ./src/GitHubDiscordNotifier.Tests/
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+COPY ["src/GitHubDiscordNotifier.Api/GitHubDiscordNotifier.Api.csproj", "GitHubDiscordNotifier.Api/"]
+COPY ["src/GitHubDiscordNotifier.Application/GitHubDiscordNotifier.Application.csproj", "GitHubDiscordNotifier.Application/"]
+COPY ["src/GitHubDiscordNotifier.Domain/GitHubDiscordNotifier.Domain.csproj", "GitHubDiscordNotifier.Domain/"]
+COPY ["src/GitHubDiscordNotifier.Infrastructure/GitHubDiscordNotifier.Infrastructure.csproj", "GitHubDiscordNotifier.Infrastructure/"]
+RUN dotnet restore "GitHubDiscordNotifier.Api/GitHubDiscordNotifier.Api.csproj"
+COPY src/ .
+WORKDIR "/src/GitHubDiscordNotifier.Api"
+RUN dotnet build "GitHubDiscordNotifier.Api.csproj" -c Release -o /app/build
 
-# Restore packages
-RUN dotnet restore
+FROM build AS publish
+RUN dotnet publish "GitHubDiscordNotifier.Api.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
-# Copy everything else and build
-COPY . ./
-RUN dotnet publish src/GitHubDiscordNotifier.Api/GitHubDiscordNotifier.Api.csproj -c Release -o out
-
-# Build runtime image
-FROM mcr.microsoft.com/azure-functions/dotnet:4
-WORKDIR /home/site/wwwroot
-COPY --from=build-env /app/out .
-
-ENV AzureWebJobsScriptRoot=/home/site/wwwroot \
-    AzureFunctionsJobHost__Logging__Console__IsEnabled=true
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENV ASPNETCORE_URLS=http://+:5000
+ENTRYPOINT ["dotnet", "GitHubDiscordNotifier.Api.dll"]

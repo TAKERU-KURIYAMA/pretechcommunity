@@ -1,15 +1,25 @@
-﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{8E2F6A87-1826-4A3C-9FFF-6A3E7C0E3B4D}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{CA6E1CC5-0C4F-4E5C-B3D1-66D4E6C8F9E4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitHubDiscordNotifier.Api", "src\GitHubDiscordNotifier.Api\GitHubDiscordNotifier.Api.csproj", "{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitHubDiscordNotifier.Api", "src\GitHubDiscordNotifier.Api\GitHubDiscordNotifier.Api.csproj", "{8D0B9A8C-2F77-4E5B-9FA5-5D8C9D8E4F7C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitHubDiscordNotifier.Common", "src\GitHubDiscordNotifier.Common\GitHubDiscordNotifier.Common.csproj", "{9A19103F-16F7-4668-BE54-9A1E7A4F7557}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitHubDiscordNotifier.Application", "src\GitHubDiscordNotifier.Application\GitHubDiscordNotifier.Application.csproj", "{A2D6F4B8-3E9C-4D8B-B7F1-2E4C5D7A9F3B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitHubDiscordNotifier.Tests", "src\GitHubDiscordNotifier.Tests\GitHubDiscordNotifier.Tests.csproj", "{9A19103F-16F7-4668-BE54-9A1E7A4F7558}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitHubDiscordNotifier.Domain", "src\GitHubDiscordNotifier.Domain\GitHubDiscordNotifier.Domain.csproj", "{C4E8B2F9-5A7D-4C9E-A8F2-3F5D6E8B0C4A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitHubDiscordNotifier.Infrastructure", "src\GitHubDiscordNotifier.Infrastructure\GitHubDiscordNotifier.Infrastructure.csproj", "{D6F0C3A7-8B9E-4F2A-C9D1-4A7E8F9C1D5B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitHubDiscordNotifier.Tests", "src\GitHubDiscordNotifier.Tests\GitHubDiscordNotifier.Tests.csproj", "{E8A2D5B9-7C4F-4A8D-D0E3-5B8F9A2E6C7D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B3E5F8D2-9C7A-4E8B-A2F1-6D9E7C8A5F3B}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		docker-compose.yml = docker-compose.yml
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,22 +27,38 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{9A19103F-16F7-4668-BE54-9A1E7A4F7556}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9A19103F-16F7-4668-BE54-9A1E7A4F7556}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9A19103F-16F7-4668-BE54-9A1E7A4F7556}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9A19103F-16F7-4668-BE54-9A1E7A4F7556}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9A19103F-16F7-4668-BE54-9A1E7A4F7557}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9A19103F-16F7-4668-BE54-9A1E7A4F7557}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9A19103F-16F7-4668-BE54-9A1E7A4F7557}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9A19103F-16F7-4668-BE54-9A1E7A4F7557}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9A19103F-16F7-4668-BE54-9A1E7A4F7558}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9A19103F-16F7-4668-BE54-9A1E7A4F7558}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9A19103F-16F7-4668-BE54-9A1E7A4F7558}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9A19103F-16F7-4668-BE54-9A1E7A4F7558}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8D0B9A8C-2F77-4E5B-9FA5-5D8C9D8E4F7C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D0B9A8C-2F77-4E5B-9FA5-5D8C9D8E4F7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D0B9A8C-2F77-4E5B-9FA5-5D8C9D8E4F7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D0B9A8C-2F77-4E5B-9FA5-5D8C9D8E4F7C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2D6F4B8-3E9C-4D8B-B7F1-2E4C5D7A9F3B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2D6F4B8-3E9C-4D8B-B7F1-2E4C5D7A9F3B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2D6F4B8-3E9C-4D8B-B7F1-2E4C5D7A9F3B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2D6F4B8-3E9C-4D8B-B7F1-2E4C5D7A9F3B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C4E8B2F9-5A7D-4C9E-A8F2-3F5D6E8B0C4A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C4E8B2F9-5A7D-4C9E-A8F2-3F5D6E8B0C4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C4E8B2F9-5A7D-4C9E-A8F2-3F5D6E8B0C4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C4E8B2F9-5A7D-4C9E-A8F2-3F5D6E8B0C4A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D6F0C3A7-8B9E-4F2A-C9D1-4A7E8F9C1D5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D6F0C3A7-8B9E-4F2A-C9D1-4A7E8F9C1D5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D6F0C3A7-8B9E-4F2A-C9D1-4A7E8F9C1D5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D6F0C3A7-8B9E-4F2A-C9D1-4A7E8F9C1D5B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E8A2D5B9-7C4F-4A8D-D0E3-5B8F9A2E6C7D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E8A2D5B9-7C4F-4A8D-D0E3-5B8F9A2E6C7D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E8A2D5B9-7C4F-4A8D-D0E3-5B8F9A2E6C7D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E8A2D5B9-7C4F-4A8D-D0E3-5B8F9A2E6C7D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{9A19103F-16F7-4668-BE54-9A1E7A4F7556} = {8E2F6A87-1826-4A3C-9FFF-6A3E7C0E3B4D}
-		{9A19103F-16F7-4668-BE54-9A1E7A4F7557} = {8E2F6A87-1826-4A3C-9FFF-6A3E7C0E3B4D}
-		{9A19103F-16F7-4668-BE54-9A1E7A4F7558} = {8E2F6A87-1826-4A3C-9FFF-6A3E7C0E3B4D}
+		{8D0B9A8C-2F77-4E5B-9FA5-5D8C9D8E4F7C} = {CA6E1CC5-0C4F-4E5C-B3D1-66D4E6C8F9E4}
+		{A2D6F4B8-3E9C-4D8B-B7F1-2E4C5D7A9F3B} = {CA6E1CC5-0C4F-4E5C-B3D1-66D4E6C8F9E4}
+		{C4E8B2F9-5A7D-4C9E-A8F2-3F5D6E8B0C4A} = {CA6E1CC5-0C4F-4E5C-B3D1-66D4E6C8F9E4}
+		{D6F0C3A7-8B9E-4F2A-C9D1-4A7E8F9C1D5B} = {CA6E1CC5-0C4F-4E5C-B3D1-66D4E6C8F9E4}
+		{E8A2D5B9-7C4F-4A8D-D0E3-5B8F9A2E6C7D} = {CA6E1CC5-0C4F-4E5C-B3D1-66D4E6C8F9E4}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F0A7C8E9-2D4B-4F9A-8C5E-7B3D9E6A1F4C}
 	EndGlobalSection
 EndGlobal
